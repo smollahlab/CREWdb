@@ -16,7 +16,21 @@ Machine Learning prediction and classification models used in CREWdb:
   
 Each of the models were trained using 5-fold Cross validation and Leave One Out Cross Validation (LOOCV). 
 
+5-Fold-CREWdb.py : Machine learning pipeline for all mentioned models using 5-fold cross-validation.
+LOOCV-CREWdb.py : Machine learning pipeline for all mentioned models using leave one out cross-validation.
+
 ## How to use
 Requirements : 
-Python (
+  Python (v 3.9)
+Packages:
+  1. Numpy
+  2. Pandas
+  3. Scikit-learn
+  4. matplotlib
+  5. imbalanced-learn
+  6. seaborn
+  
+ After setting up the Python environment with the above packages, the python scripts can be executed using : python filename.py
+ 
 ## Citation
+Maya Natesan, Reetika Ghag, Mitchelle Kong, Min Shi, Shamim Mollah. “CREWdb: Optimizing Chromatin Readers, Erasers, and Writers Database using Machine Learning-Based Approach”. 2022. (doi.org/10.1101/2022.06.02.494594)
