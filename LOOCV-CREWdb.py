@@ -287,7 +287,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-def knn_kfolds(X, y, n_folds, n_neighbors, new_data, old_y, random_state=None):
+def knn_kfolds(X, y, n_neighbors, new_data, old_y, random_state=None):
     
     auc_s = []
     accuracy_s = []
@@ -298,9 +298,7 @@ def knn_kfolds(X, y, n_folds, n_neighbors, new_data, old_y, random_state=None):
     scores_id = []
     scores = []
     sample_ids = np.array(new_data.index)
-    
-    kf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state = random_state)
-    
+        
     model = KNeighborsClassifier(n_neighbors= n_neighbors)
     
     loocv = LeaveOneOut()
@@ -367,7 +365,7 @@ def knn_kfolds(X, y, n_folds, n_neighbors, new_data, old_y, random_state=None):
 #Decision Tree Model
 from sklearn.tree import DecisionTreeClassifier
 
-def decision_tree(X, y, n_folds, max_depth, new_data, old_y, random_state=None):
+def decision_tree(X, y, max_depth, new_data, old_y, random_state=None):
     
     auc_s = [] 
     accuracy_s = []
@@ -378,8 +376,6 @@ def decision_tree(X, y, n_folds, max_depth, new_data, old_y, random_state=None):
     scores = []
     sample_ids = np.array(new_data.index)
             
-    kf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state = random_state)
-
     model = DecisionTreeClassifier(max_depth= max_depth)
     
     loocv = LeaveOneOut()
@@ -447,7 +443,7 @@ def decision_tree(X, y, n_folds, max_depth, new_data, old_y, random_state=None):
 #Random Forest Model
 from sklearn.ensemble import RandomForestClassifier
 
-def random_forest(X, y, n_folds, max_depth, new_data, old_y, random_state=None):
+def random_forest(X, y, max_depth, new_data, old_y, random_state=None):
     
     auc_s = []
     accuracy_s = []
@@ -458,8 +454,6 @@ def random_forest(X, y, n_folds, max_depth, new_data, old_y, random_state=None):
     scores = []
     sample_ids = np.array(new_data.index)
             
-    kf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state = random_state)
-
     model = RandomForestClassifier(max_depth= max_depth)
     
     loocv = LeaveOneOut()
@@ -532,7 +526,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
-def svm_f(X, y, n_folds, new_data, old_y, random_state=None):
+def svm_f(X, y, new_data, old_y, random_state=None):
     
     auc_s = []
     accuracy_s = []
@@ -543,8 +537,6 @@ def svm_f(X, y, n_folds, new_data, old_y, random_state=None):
     scores = []
     sample_ids = np.array(new_data.index)
     
-    kf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state = random_state)
-
     clf = make_pipeline(StandardScaler(), SVC(gamma='auto', probability=True))
     
     loocv = LeaveOneOut()
@@ -611,7 +603,7 @@ def svm_f(X, y, n_folds, new_data, old_y, random_state=None):
 #Feed-Forward Neural Network Model
 from sklearn.neural_network import MLPClassifier
 
-def fnn_f(X, y, n_folds, new_data, old_y, random_state=None):
+def fnn_f(X, y, new_data, old_y, random_state=None):
     
     auc_s = []
     accuracy_s = []
@@ -622,8 +614,6 @@ def fnn_f(X, y, n_folds, new_data, old_y, random_state=None):
     scores = []
     sample_ids = np.array(new_data.index)
             
-    kf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state = random_state)
-
     clf = MLPClassifier(random_state=0, max_iter=5000)
     
     loocv = LeaveOneOut()
@@ -690,14 +680,12 @@ def fnn_f(X, y, n_folds, new_data, old_y, random_state=None):
 #Logistic Regression Model
 from sklearn.linear_model import LogisticRegression
 
-def lr(X, y, n_folds, new_data, old_y, random_state=None):
+def lr(X, y, new_data, old_y, random_state=None):
     
     auc_s = []
     accuracy_s = []
     f1_s = []
             
-    kf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state = random_state)
-
     clf = LogisticRegression(penalty ='l2')
     
     #score_id
@@ -786,17 +774,17 @@ rf_values = []
 
 k = range(1,10)
 for i in k:
-    knn = knn_kfolds(X_smote, y_smote, 160, i, data, y_, random_state=5)
-    dt = decision_tree(X_smote, y_smote, 160, i, data, y_, random_state=5)
-    rf = random_forest(X_smote, y_smote, 160, i, data, y_, random_state=5) 
+    knn = knn_kfolds(X_smote, y_smote, i, data, y_, random_state=5)
+    dt = decision_tree(X_smote, y_smote, i, data, y_, random_state=5)
+    rf = random_forest(X_smote, y_smote, i, data, y_, random_state=5) 
 
     knn_values.append(knn[0])
     dt_values.append(dt[0])
     rf_values.append(rf[0])
 
-svm = svm_f(X_smote, y_smote, 160, data, y_, random_state=5)
-fnn = fnn_f(X_smote, y_smote, 160, data, y_, random_state=5)
-lr_s = lr(X_smote, y_smote, 160, data, y_, random_state=5)
+svm = svm_f(X_smote, y_smote, data, y_, random_state=5)
+fnn = fnn_f(X_smote, y_smote, data, y_, random_state=5)
+lr_s = lr(X_smote, y_smote, data, y_, random_state=5)
 
 auc.append(max(knn_values))
 auc.append(max(rf_values))
@@ -843,7 +831,7 @@ results['confusion_matrix'] = confusion_matrices
 
 sns.set(style="white")
 labs=['Eraser','Writer', 'Reader']
-models = ["K-Neighbors Classifier", "Decision Tree", "Random Forest", "Support Vector Machine", "Feed-Forward Neural Network", "Logistic Regression"]
+models = ["K-Neighbors Classifier", "Decision Tree", "Random Forest", "Feed-Forward Neural Network", "Logistic Regression","Support Vector Machine"]
 i = 0
 img_file ="loocv"
 for m in results['confusion_matrix']:
