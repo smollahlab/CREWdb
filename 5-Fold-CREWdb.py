@@ -11,6 +11,34 @@
 #Importing packages
 import pandas as pd
 import numpy as np
+from sklearn import preprocessing
+from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import OneHotEncoder
+from imblearn.over_sampling import SMOTE
+from sklearn.preprocessing import LabelEncoder
+from collections import Counter
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.neural_network import MLPClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import KFold
+from sklearn.metrics import roc_auc_score
+from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.pipeline import make_pipeline
+from sklearn.feature_selection import VarianceThreshold
+from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score
+from sklearn.metrics import precision_recall_curve
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.metrics import plot_confusion_matrix
+from sklearn.metrics import confusion_matrix
 
 
 # ### Data Integration
@@ -33,7 +61,7 @@ data.info()
 
 
 #Dropping columns 'ID' and 'SYMBOL' because they are not features
-data.drop(['ID (REMOVE)', 'SYMBOL', 'HGNC approved name', 'Product'], axis = 1, inplace = True)
+data.drop(['ID (REMOVE)', 'SYMBOL', 'HGNC approved name'], axis = 1, inplace = True) # check if product is to be removed as a feature
 data.replace('#', np.nan, inplace = True)
 
 
@@ -54,23 +82,15 @@ data.replace(np.nan, '-', inplace = True)
 
 
 #Using one-hot encoding 
-from sklearn.preprocessing import OneHotEncoder
-
 X = data.iloc[:, 1:]
 encoder = OneHotEncoder(handle_unknown='ignore', sparse = False)
 X_encoded = encoder.fit_transform(X)
-X_encoded.shape
+print("X_encoded_shape", X_encoded.shape)
 
 
 # ### Class Rebalancing
 
 # In[ ]:
-
-
-from imblearn.over_sampling import SMOTE
-from sklearn.preprocessing import LabelEncoder
-from collections import Counter
-
 y_df = data['REW']
 
 X = X_encoded
@@ -80,6 +100,8 @@ y_ = LabelEncoder().fit_transform(y)
 oversample = SMOTE(random_state=42)
 X_smote, y_smote = oversample.fit_resample(X, y_)
 
+print("Shape of X_smote: ", X_smote.shape)
+
 
 # ### Methods for each ML Model
 
@@ -88,163 +110,135 @@ X_smote, y_smote = oversample.fit_resample(X, y_)
 # In[ ]:
 
 
-from sklearn.neural_network import MLPClassifier
-
-    
-auc_s = []
-accuracy_s = []
-f1_s = []
-    
-    #score_id
-scores_id = []
-scores = []
-sample_ids = np.array(data.index)
-            
-kf = StratifiedKFold(n_splits=5, shuffle=True, random_state = None)
-
-clf = MLPClassifier(hidden_layer_sizes = (100,100,), random_state=0, max_iter=5000)
-    
-for fold, (train_idx, test_idx) in enumerate(kf.split(X_smote,y_smote)):
-  X_train = X_smote[train_idx]
-  X_test = X_smote[test_idx]
-  anova_filter = SelectKBest(f_classif, k= 8)
-  var_filter = VarianceThreshold(threshold= .8 * (1 - .8))
-  anova_knn = make_pipeline(var_filter, anova_filter, clf)
-  anova_knn.fit(X_train, y_smote[train_idx])
-  y_pred_prob = anova_knn.predict_proba(X_test)
-  y_pred = anova_knn.predict(X_test)
-
-  auc = roc_auc_score(y_smote[test_idx], y_pred_prob, multi_class='ovr')
-  auc_s.append(auc)
-  accuracy_s.append(accuracy_score(y_smote[test_idx], y_pred))
-  f1_s.append(f1_score(y_smote[test_idx], y_pred, average='weighted'))      
-  scores_id.append(test_idx)
-  scores.append(y_pred_prob)
+def deepNeuralNet(X_smote, y_smote, data, folds, random_state_val):    
+    auc_s = []
+    accuracy_s = []
+    f1_s = []
         
-scores_id = np.concatenate(scores_id, axis=0) 
-scores = np.concatenate(scores, axis=0) 
-map_ids = []
-for i in range(len(sample_ids)):
-    map_ids.append(np.where(scores_id==i)[0][0])
-    map_scores = scores[map_ids]
-y_predict = np.argmax(map_scores, axis=1)
-    
-confusion_mat = confusion_matrix(y_, y_predict)
-sns.set(style="white")
-labs=['Eraser','Writer', 'Reader']
-    # Generate a large random dataset
-plt.figure(figsize=(4, 4))
-sns.set(font_scale=1.2)
-ax = sns.heatmap(confusion_mat, annot=True, square=True, xticklabels=labs, yticklabels=labs, cmap='RdPu', fmt="d",cbar_kws={"shrink": 0.85})
-ax.xaxis.tick_top()
-ax.yaxis.tick_left()
-ax.set_xticklabels(labs, fontsize=14)
-ax.set_yticklabels(labs, fontsize=14)
-plt.xlabel('Deep Neural Net', fontsize=14, labelpad=11)
-plt.yticks(rotation=0) 
-plt.xticks(rotation=0) 
-plt.savefig("dnn_5", format="png",bbox_inches='tight', dpi=600)
+        #score_id
+    scores_id_dnn = []
+    scores_dnn = []
+    sample_ids = np.array(data.index)
+                
+    kf = StratifiedKFold(n_splits=folds, shuffle=True, random_state = random_state_val)
 
+    clf = MLPClassifier(hidden_layer_sizes = (100,100,), random_state=0, max_iter=5000)
+        
+    for fold, (train_idx, test_idx) in enumerate(kf.split(X_smote,y_smote)):
+        X_train = X_smote[train_idx]
+        X_test = X_smote[test_idx]
+        anova_filter = SelectKBest(f_classif, k= 8)
+        var_filter = VarianceThreshold(threshold= .8 * (1 - .8))
+        anova_knn = make_pipeline(var_filter, anova_filter, clf)
+        anova_knn.fit(X_train, y_smote[train_idx])
+        y_pred_prob = anova_knn.predict_proba(X_test)
+        y_pred = anova_knn.predict(X_test)
 
-plt.show()
+        auc = roc_auc_score(y_smote[test_idx], y_pred_prob, multi_class='ovr')
+        auc_s.append(auc)
+        accuracy_s.append(accuracy_score(y_smote[test_idx], y_pred))
+        f1_s.append(f1_score(y_smote[test_idx], y_pred, average='weighted'))      
+        scores_id_dnn.append(test_idx)
+        scores_dnn.append(y_pred_prob)
             
-avg_score = np.mean(auc_s)
-accuracy = np.mean(accuracy_s)
-f1 = np.mean(f1_s)
-
+    scores_id_dnn = np.concatenate(scores_id_dnn, axis=0) 
+    scores_dnn = np.concatenate(scores_dnn, axis=0) 
+    map_ids = []
+    for i in range(len(sample_ids)):
+        map_ids.append(np.where(scores_id_dnn==i)[0][0])
+        map_scores = scores_dnn[map_ids]
+    y_predict = np.argmax(map_scores, axis=1)
+        
+    confusion_mat = confusion_matrix(y_, y_predict)
+    sns.set(style="white")
+    labs=['Eraser','Writer', 'Reader']
+        # Generate a large random dataset
+    plt.figure(figsize=(4, 4))
+    sns.set(font_scale=1.2)
+    ax = sns.heatmap(confusion_mat, annot=True, square=True, xticklabels=labs, yticklabels=labs, cmap='RdPu', fmt="d",cbar_kws={"shrink": 0.85})
+    ax.xaxis.tick_top()
+    ax.yaxis.tick_left()
+    ax.set_xticklabels(labs, fontsize=14)
+    ax.set_yticklabels(labs, fontsize=14)
+    plt.xlabel('Deep Neural Net', fontsize=14, labelpad=11)
+    plt.yticks(rotation=0) 
+    plt.xticks(rotation=0) 
+    plt.savefig("dnn_5", format="png",bbox_inches='tight', dpi=600)
+    plt.show()
+    avg_score = np.mean(auc_s)
+    accuracy = np.mean(accuracy_s)
+    f1 = np.mean(f1_s)
+    return [avg_score, accuracy, f1, confusion_mat]
 
 # ***Naive Bayes***
+def naiveBayes(X_smote, y_smote, data, folds, random_state_val):
+    kf = StratifiedKFold(n_splits=folds, shuffle=True, random_state = random_state_val)
 
-# In[ ]:
+    model =GaussianNB()
 
+    predicted_prob_dict = dict()
+    auc_s = []
+    accuracy_s = []
+    f1_s = []
+    ytest = []
+    ypred = []
+        
+    #score_id
+    scores_id_nb = []
+    scores = []
+    sample_ids = np.array(data.index)
 
-kf = StratifiedKFold(n_splits=5, shuffle=True, random_state = None)
+    for fold, (train_idx, test_idx) in enumerate(kf.split(X_smote, y_smote)):
+        X_train = X_smote[train_idx]
+        X_test = X_smote[test_idx]
 
-model =GaussianNB()
+        anova_filter = SelectKBest(f_classif, k= 8)
+        var_filter = VarianceThreshold(threshold= .8 * (1 - .8))
+        anova_pipeline = make_pipeline(var_filter, anova_filter, model)
+        anova_pipeline.fit(X_train, y_smote[train_idx])
+        y_pred_prob = anova_pipeline.predict_proba(X_test)
+        y_pred = anova_pipeline.predict(X_test)
 
-predicted_prob_dict = dict()
-auc_s = []
-accuracy_s = []
-f1_s = []
-ytest = []
-ypred = []
-    
-#score_id
-scores_id = []
-scores = []
-sample_ids = np.array(data.index)
+        auc = roc_auc_score(y_smote[test_idx], y_pred_prob, multi_class='ovr')
+        auc_s.append(auc)
+        accuracy_s.append(accuracy_score(y_smote[test_idx], y_pred))
+        f1_s.append(f1_score(y_smote[test_idx], y_pred, average="weighted"))
+        scores_id_nb.append(test_idx)
+        scores.append(y_pred_prob)
 
-for fold, (train_idx, test_idx) in enumerate(kf.split(X_smote, y_smote)):
-  X_train = X_smote[train_idx]
-  X_test = X_smote[test_idx]
+    scores_id_nb = np.concatenate(scores_id_nb, axis=0) 
+    scores = np.concatenate(scores, axis=0) 
+    map_ids = []
+    for i in range(len(sample_ids)):
+        map_ids.append(np.where(scores_id_nb==i)[0][0])
+        map_scores = scores[map_ids]
+    y_predict = np.argmax(map_scores, axis=1)
 
-  anova_filter = SelectKBest(f_classif, k= 8)
-  var_filter = VarianceThreshold(threshold= .8 * (1 - .8))
-  anova_pipeline = make_pipeline(var_filter, anova_filter, model)
-  anova_pipeline.fit(X_train, y_smote[train_idx])
-  y_pred_prob = anova_pipeline.predict_proba(X_test)
-  y_pred = anova_pipeline.predict(X_test)
+    confusion_mat = confusion_matrix(y_, y_predict)
 
-  auc = roc_auc_score(y_smote[test_idx], y_pred_prob, multi_class='ovr')
-  auc_s.append(auc)
-  accuracy_s.append(accuracy_score(y_smote[test_idx], y_pred))
-  f1_s.append(f1_score(y_smote[test_idx], y_pred, average="weighted"))
-  scores_id.append(test_idx)
-  scores.append(y_pred_prob)
+    sns.set(style="white")
+    labs=['Eraser','Writer', 'Reader']
+    # Generate a large random dataset
+    plt.figure(figsize=(4, 4))
+    sns.set(font_scale=1.2)
+    ax = sns.heatmap(confusion_mat, annot=True, square=True, xticklabels=labs, yticklabels=labs, cmap='RdPu', fmt="d",cbar_kws={"shrink": 0.85})
+    ax.xaxis.tick_top()
+    ax.yaxis.tick_left()
+    ax.set_xticklabels(labs, fontsize=14)
+    ax.set_yticklabels(labs, fontsize=14)
+    plt.xlabel('Naive Bayes', fontsize=14, labelpad=11)
+    plt.yticks(rotation=0) 
+    plt.savefig("nb_5", format="png",bbox_inches='tight', dpi=600)
 
-scores_id = np.concatenate(scores_id, axis=0) 
-scores = np.concatenate(scores, axis=0) 
-map_ids = []
-for i in range(len(sample_ids)):
-  map_ids.append(np.where(scores_id==i)[0][0])
-map_scores = scores[map_ids]
-y_predict = np.argmax(map_scores, axis=1)
+    avg_score = np.mean(auc_s)
+    accuracy = np.mean(accuracy_s)
+    f1 = np.mean(f1_s)
 
-confusion_mat = confusion_matrix(y_, y_predict)
-
-sns.set(style="white")
-labs=['Eraser','Writer', 'Reader']
-# Generate a large random dataset
-plt.figure(figsize=(4, 4))
-sns.set(font_scale=1.2)
-ax = sns.heatmap(confusion_mat, annot=True, square=True, xticklabels=labs, yticklabels=labs, cmap='RdPu', fmt="d",cbar_kws={"shrink": 0.85})
-ax.xaxis.tick_top()
-ax.yaxis.tick_left()
-ax.set_xticklabels(labs, fontsize=14)
-ax.set_yticklabels(labs, fontsize=14)
-plt.xlabel('Naive Bayes', fontsize=14, labelpad=11)
-plt.yticks(rotation=0) 
-plt.savefig("nb_5", format="png",bbox_inches='tight', dpi=600)
-
-avg_score = np.mean(auc_s)
-accuracy = np.mean(accuracy_s)
-f1 = np.mean(f1_s)
-
-predicted_prob_dict[fold] = y_pred_prob
-
+    predicted_prob_dict[fold] = y_pred_prob
+    return [avg_score, accuracy, f1, confusion_mat]
 
 # ***K-Nearest Neighbors Regression***
-
 # In[ ]:
-
-
-import numpy as np
-from sklearn import preprocessing
-from sklearn.metrics import mean_squared_error
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import KFold
-from sklearn.metrics import roc_auc_score
-from sklearn.feature_selection import SelectKBest, f_classif
-from sklearn.pipeline import make_pipeline
-from sklearn.feature_selection import VarianceThreshold
-from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import f1_score
-from sklearn.metrics import precision_recall_curve
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-
 def knn_kfolds(X, y, n_folds, n_neighbors, new_data, old_y, random_state=None):
     
     auc_s = []
@@ -326,10 +320,6 @@ def knn_kfolds(X, y, n_folds, n_neighbors, new_data, old_y, random_state=None):
 # ***Decision Tree***
 
 # In[ ]:
-
-
-from sklearn.tree import DecisionTreeClassifier
-
 def decision_tree(X, y, n_folds, max_depth, new_data, old_y, random_state=None):
     
     auc_s = [] 
@@ -405,9 +395,6 @@ def decision_tree(X, y, n_folds, max_depth, new_data, old_y, random_state=None):
 # ***Random Forest***
 
 # In[ ]:
-
-
-from sklearn.ensemble import RandomForestClassifier
 
 def random_forest(X, y, n_folds, max_depth, new_data, old_y, random_state=None):
     
@@ -485,12 +472,6 @@ def random_forest(X, y, n_folds, max_depth, new_data, old_y, random_state=None):
 # **Support Vector Machine**
 
 # In[ ]:
-
-
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVC
-
 def svm_f(X, y, n_folds, new_data, old_y, random_state=None):
     
     auc_s = []
@@ -569,9 +550,6 @@ def svm_f(X, y, n_folds, new_data, old_y, random_state=None):
 
 # In[ ]:
 
-
-from sklearn.neural_network import MLPClassifier
-
 def fnn_f(X, y, n_folds, new_data, old_y, random_state=None):
     
     auc_s = []
@@ -647,10 +625,6 @@ def fnn_f(X, y, n_folds, new_data, old_y, random_state=None):
 # **Logistic Regression**
 
 # In[ ]:
-
-
-from sklearn.linear_model import LogisticRegression
-
 def lr(X, y, n_folds, new_data, old_y, random_state=None):
     
     auc_s = []
@@ -728,10 +702,6 @@ def lr(X, y, n_folds, new_data, old_y, random_state=None):
 
 
 #Running the ML models on the generated dataset
-
-from sklearn.metrics import plot_confusion_matrix
-from sklearn.metrics import confusion_matrix
-
 results = {}
 auc = []
 accuracy = []
@@ -755,6 +725,8 @@ for i in k:
 svm = svm_f(X_smote, y_smote, 5, data, y_, random_state=5)
 fnn = fnn_f(X_smote, y_smote, 5, data, y_, random_state=5)
 lr_s = lr(X_smote, y_smote, 5, data, y_, random_state=5)
+dnn = deepNeuralNet(X_smote, y_smote, data, 5, 5)
+nb = naiveBayes(X_smote, y_smote, data, 5, 5)
 
 auc.append(max(knn_values))
 auc.append(max(rf_values))
@@ -762,6 +734,8 @@ auc.append(max(dt_values))
 auc.append(fnn[0])
 auc.append(lr_s[0])
 auc.append(svm[0])
+auc.append(nb[0])
+auc.append(dnn[0])
 
 accuracy.append(knn[1])
 accuracy.append(dt[1])
@@ -769,6 +743,8 @@ accuracy.append(rf[1])
 accuracy.append(fnn[1])
 accuracy.append(lr_s[1])
 accuracy.append(svm[1])
+accuracy.append(nb[1])
+accuracy.append(dnn[1])
 
 f1.append(knn[2])
 f1.append(dt[2])
@@ -776,7 +752,8 @@ f1.append(rf[2])
 f1.append(fnn[2])
 f1.append(lr_s[2])
 f1.append(svm[2])
-
+f1.append(nb[2])
+f1.append(dnn[2])
 
 
 confusion_matrices.append(knn[3])
@@ -785,6 +762,8 @@ confusion_matrices.append(rf[3])
 confusion_matrices.append(fnn[3])
 confusion_matrices.append(lr_s[3])
 confusion_matrices.append(svm[3])
+confusion_matrices.append(nb[3])
+confusion_matrices.append(dnn[3])
 
 results['auc'] = auc
 #results['accuracy'] = accuracy
@@ -793,9 +772,6 @@ results['accuracy'] = accuracy
 results['confusion_matrix'] = confusion_matrices
  
     
-    
-
-
 # ### Plotting Confusion Matrices
 
 # In[ ]:
@@ -804,7 +780,7 @@ results['confusion_matrix'] = confusion_matrices
 #Plotting the generated confusion matrices from cell above
 sns.set(style="white")
 labs=['Eraser','Writer', 'Reader']
-models = ["K-Neighbors Classifier", "Decision Tree", "Random Forest", "Support Vector Machine", "Feed-Forward Neural Network", "Logistic Regression"]
+models = ["K-Neighbors Classifier", "Decision Tree", "Random Forest",  "Feed-Forward Neural Network", "Logistic Regression", "Support Vector Machine","Naive Bayes", "Deep Neural Network"]
 i = 0
 img_file = "confusion_matrices"
 for m in results['confusion_matrix']:
