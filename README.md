@@ -33,5 +33,8 @@ Packages:
  After setting up the Python environment with the above packages, the python scripts can be executed using the command: python filename.py
  Using Anaconda/ Miniconda is recommended to run the scripts and iPython notebooks.
  
+ If you have any problems running our code, please feel free to contact us (smollah@wustl.edu, g.reetika@wustl.edu)
+ 
 ## Citation
+If you find CREWdb useful in your research, please consider citing: 
 Maya Natesan, Reetika Ghag, Mitchelle Kong, Min Shi, Shamim Mollah. “CREWdb: Optimizing Chromatin Readers, Erasers, and Writers Database using Machine Learning-Based Approach”. 2022. (doi.org/10.1101/2022.06.02.494594)
