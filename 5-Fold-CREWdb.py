@@ -76,6 +76,7 @@ data[to_check].isna().all(1).sum()
 data.dropna(how='all', subset = to_check, inplace = True)
 print('Final Shape of Dataset:', data.shape)
 data.replace(np.nan, '-', inplace = True)
+print(data.info())
 
 
 # In[ ]:
@@ -83,6 +84,7 @@ data.replace(np.nan, '-', inplace = True)
 
 #Using one-hot encoding 
 X = data.iloc[:, 1:]
+print("Number of features used for training :", X.shape[1])
 encoder = OneHotEncoder(handle_unknown='ignore', sparse = False)
 X_encoded = encoder.fit_transform(X)
 print("X_encoded_shape", X_encoded.shape)
@@ -101,6 +103,7 @@ oversample = SMOTE(random_state=42)
 X_smote, y_smote = oversample.fit_resample(X, y_)
 
 print("Shape of X_smote: ", X_smote.shape)
+print("Shape of y_smote: ", y_smote.shape)
 
 
 # ### Methods for each ML Model
@@ -151,7 +154,7 @@ def deepNeuralNet(X_smote, y_smote, data, folds, random_state_val):
         
     confusion_mat = confusion_matrix(y_, y_predict)
     sns.set(style="white")
-    labs=['Eraser','Writer', 'Reader']
+    labs=['Eraser', 'Reader','Writer']
         # Generate a large random dataset
     plt.figure(figsize=(4, 4))
     sns.set(font_scale=1.2)
@@ -217,7 +220,7 @@ def naiveBayes(X_smote, y_smote, data, folds, random_state_val):
     confusion_mat = confusion_matrix(y_, y_predict)
 
     sns.set(style="white")
-    labs=['Eraser','Writer', 'Reader']
+    labs=['Eraser', 'Reader','Writer']
     # Generate a large random dataset
     plt.figure(figsize=(4, 4))
     sns.set(font_scale=1.2)
@@ -294,7 +297,7 @@ def knn_kfolds(X, y, n_folds, n_neighbors, new_data, old_y, random_state=None):
     confusion_mat = confusion_matrix(old_y, y_predict)
 
     sns.set(style="white")
-    labs=['Eraser','Writer', 'Reader']
+    labs=['Eraser', 'Reader','Writer']
     # Generate a large random dataset
     plt.figure(figsize=(4, 4))
     sns.set(font_scale=1.2)
@@ -370,7 +373,7 @@ def decision_tree(X, y, n_folds, max_depth, new_data, old_y, random_state=None):
     confusion_mat = confusion_matrix(old_y, y_predict)
 
     sns.set(style="white")
-    labs=['Eraser','Writer', 'Reader']
+    labs=['Eraser', 'Reader','Writer']
     # Generate a large random dataset
     plt.figure(figsize=(4, 4))
     sns.set(font_scale=1.2)
@@ -447,7 +450,7 @@ def random_forest(X, y, n_folds, max_depth, new_data, old_y, random_state=None):
     confusion_mat = confusion_matrix(old_y, y_predict)
 
     sns.set(style="white")
-    labs=['Eraser','Writer', 'Reader']
+    labs=['Eraser', 'Reader','Writer']
     # Generate a large random dataset
     plt.figure(figsize=(4, 4))
     sns.set(font_scale=1.2)
@@ -523,7 +526,7 @@ def svm_f(X, y, n_folds, new_data, old_y, random_state=None):
     confusion_mat = confusion_matrix(old_y, y_predict)
 
     sns.set(style="white")
-    labs=['Eraser','Writer', 'Reader']
+    labs=['Eraser', 'Reader','Writer']
     # Generate a large random dataset
     plt.figure(figsize=(4, 4))
     sns.set(font_scale=1.2)
@@ -600,7 +603,7 @@ def fnn_f(X, y, n_folds, new_data, old_y, random_state=None):
     confusion_mat = confusion_matrix(old_y, y_predict)
 
     sns.set(style="white")
-    labs=['Eraser','Writer', 'Reader']
+    labs=['Eraser', 'Reader','Writer']
     # Generate a large random dataset
     plt.figure(figsize=(4, 4))
     sns.set(font_scale=1.2)
@@ -674,7 +677,7 @@ def lr(X, y, n_folds, new_data, old_y, random_state=None):
     confusion_mat = confusion_matrix(old_y, y_predict)
 
     sns.set(style="white")
-    labs=['Eraser','Writer', 'Reader']
+    labs=['Eraser', 'Reader','Writer']
     # Generate a large random dataset
     plt.figure(figsize=(4, 4))
     sns.set(font_scale=1.2)
@@ -779,7 +782,7 @@ results['confusion_matrix'] = confusion_matrices
 
 #Plotting the generated confusion matrices from cell above
 sns.set(style="white")
-labs=['Eraser','Writer', 'Reader']
+labs=['Eraser','Reader', 'Writer']
 models = ["K-Neighbors Classifier", "Decision Tree", "Random Forest",  "Feed-Forward Neural Network", "Logistic Regression", "Support Vector Machine","Naive Bayes", "Deep Neural Network"]
 i = 0
 img_file = "confusion_matrices"
