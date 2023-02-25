@@ -36,6 +36,8 @@ Packages:
  If you have any problems running our code, please feel free to contact us (smollah@wustl.edu, g.reetika@wustl.edu)
  
 ## Citation
-If you find CREWdb useful in your research, please consider citing: 
+Please cite the following paper if you are using CREWdb for your research: 
 
-Maya Natesan, Reetika Ghag, Mitchelle Kong, Min Shi, Shamim Mollah. “CREWdb: Optimizing Chromatin Readers, Erasers, and Writers Database using Machine Learning-Based Approach”. 2022. (doi.org/10.1101/2022.06.02.494594)
+CREWdb 1.0: Optimizing Chromatin Readers, Erasers, and Writers Database using Machine Learning-Based Approach
+Maya Natesan, Reetika Ghag, Mitchell Kong, Min Shi, Shamim Mollah
+bioRxiv 2022.06.02.494594; doi: https://doi.org/10.1101/2022.06.02.494594
