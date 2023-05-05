@@ -34,6 +34,7 @@ Packages:
  Using Anaconda/ Miniconda is recommended to run the scripts and iPython notebooks.
  
  If you have any problems running our code, please feel free to contact us (smollah@wustl.edu, g.reetika@wustl.edu)
+ Note : This repository only contains the code for the machine learning models. The code for the web-interface and database is not included.
  
 ## Citation
 Please cite the following paper if you are using CREWdb for your research: 
