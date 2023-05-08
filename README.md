@@ -23,12 +23,12 @@ LOOCV-CREWdb.py : Machine learning pipeline for all mentioned models using leave
 Requirements : 
   Python (v 3.9)
 Packages:
-  1. Numpy
-  2. Pandas
-  3. Scikit-learn
-  4. matplotlib
-  5. imbalanced-learn
-  6. seaborn
+  1. Numpy (v 1.16.0)
+  2. Pandas (v 1.1.5)
+  3. Scikit-learn (v 0.24.2)
+  4. matplotlib (v 3.3.4)
+  5. imbalanced-learn (v 0.8.1)
+  6. seaborn (v 0.11.2)
   
  After setting up the Python environment with the above packages, the python scripts can be executed using the command: python filename.py
  Using Anaconda/ Miniconda is recommended to run the scripts and iPython notebooks.
