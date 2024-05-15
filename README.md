@@ -41,5 +41,5 @@ Packages:
 Please cite the following paper if you are using CREWdb for your research: 
 
 CREWdb 1.0: Optimizing Chromatin Readers, Erasers, and Writers Database using Machine Learning-Based Approach.
-Maya Natesan, Reetika Ghag, Mitchell Kong, Min Shi, Shamim Mollah
+Reetika Ghag, Maya Natesan, Mitchell Kong, Tina Tang, Minyoung Ahn, Shamim Mollah
 bioRxiv 2022.06.02.494594; doi: https://doi.org/10.1101/2022.06.02.494594
